@@ -12,6 +12,7 @@ jobs:
           DEBIAN_FRONTEND: "noninteractive"
         run: |
           sudo apt-get install -y \
+            libgcrypt-dev \
             ninja-build \
           && :
       - name: Configure
