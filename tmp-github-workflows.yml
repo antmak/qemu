@@ -1,0 +1,82 @@
+name: 'build'
+
+on: [push, pull_request]
+
+jobs:
+  # build:
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - platform: macos-x86_64
+  #           runs_on: macos-10.15
+  #           extra_configure_args: "--disable-cocoa --disable-coreaudio"
+  #         - platform: linux-amd64
+  #           runs_on: ubuntu-18.04
+  #           # Building with -Werror only on Linux as that breaks some features detection
+  #           # in meson on macOS.
+  #           extra_configure_args: "--extra-cflags=-Werror --disable-gtk"
+  #   runs-on: ${{ matrix.runs_on }}
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Install prerequisites (Linux)
+  #       if: ${{ matrix.platform == 'linux-amd64' }}
+  #       env:
+  #         DEBIAN_FRONTEND: "noninteractive"
+  #       run: |
+  #         sudo apt-get install -y \
+  #             binutils-dev \
+  #             ninja-build \
+  #             libgcrypt-dev \
+  #     - name: Install prerequisites (macOS)
+  #       if: ${{ matrix.platform == 'macos-x86_64' }}
+  #       run: |
+  #         brew install \
+  #             ninja \
+  #             libgcrypt \
+  #             glib \
+  #             pixman \
+  #             pkg-config
+  #     - name: Configure
+  #       run: |
+  #         ./configure \
+  #           --prefix=$PWD/install/qemu \
+  #           --target-list=xtensa-softmmu \
+  #           --enable-gcrypt \
+  #           --disable-user \
+  #           --disable-capstone \
+  #           --disable-vnc \
+  #           --disable-sdl \
+  #           --disable-docs \
+  #           ${{ matrix.extra_configure_args }}
+  #     - name: Build
+  #       run: |
+  #         ninja -C build
+  #     - name: Package distribution archive
+  #       run: |
+  #         ninja -C build install
+  #         find install/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
+  #         mkdir -p dist
+  #         export DIST_DIR=${PWD}/dist
+  #         export ARCHIVE_NAME=qemu-${{ github.ref_name }}-${{ matrix.platform }}.tar.bz2
+  #         cd install
+  #         tar cjvf ${DIST_DIR}/${ARCHIVE_NAME} qemu
+  #         cd ${DIST_DIR}
+  #         shasum -a 256 *.tar.bz2 > ${ARCHIVE_NAME}.sha256
+
+  build-win:
+    env:
+      MSYS_PACKAGES: mingw-w64-x86_64-python mingw-w64-x86_64-toolchain mingw-w64-x86_64-glib2 mingw-w64-x86_64-ninja mingw-w64-x86_64-jemalloc mingw-w64-x86_64-lzo2 mingw-w64-x86_64-zstd mingw-w64-x86_64-libjpeg-turbo mingw-w64-x86_64-pixman mingw-w64-x86_64-libpng mingw-w64-x86_64-libxml2 mingw-w64-x86_64-curl mingw-w64-x86_64-libgcrypt
+      CONFIG_OPTS: --target-list=xtensa-softmmu --enable-gcrypt --disable-user --disable-docs --disable-sdl --disable-vnc --disable-gtk
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v2
+      - name: Add msys to PATH
+        run: echo "C:\msys64\usr\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Install prerequisites
+        run: |
+          bash.exe -lc "pacman -S --noconfirm ${{ env.MSYS_PACKAGES }}"
+      - name: Build
+        run: |
+          bash.exe -lc "./configure --python=python3 ${{ env.CONFIG_OPTS }}"
+          bash.exe -lc "ninja -C build"
+
