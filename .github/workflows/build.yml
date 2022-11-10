@@ -39,4 +39,4 @@ jobs:
           ninja -C build install
           find opt/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
           cd opt
-          tar cxvf qemu-test-111.tar.gz qemu
+          tar cJvf qemu-test-111.tar.xz qemu
