@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
+
       - name: Install dependencies
         env:
           DEBIAN_FRONTEND: "noninteractive"
@@ -15,6 +16,7 @@ jobs:
             libgcrypt-dev \
             ninja-build \
           && :
+
       - name: Configure
         run: |
           ./configure \
@@ -31,12 +33,23 @@ jobs:
             --disable-gtk \
             --enable-gcrypt \
           && :
+
       - name: Build
         run: |
           ninja -C build
+
       - name: Package
         run: |
           ninja -C build install
           find opt/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
           cd opt
           tar cJvf qemu-test-111.tar.xz qemu
+
+      # - name: Tmp arch
+      #   run: mkdir opt && cd opt && echo 123123 > 123.txt && tar cJvf qemu-test-111.tar.xz 123.txt
+
+      - name: Prep artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: qemu-test-111
+          path: opt/qemu-test-111.tar.xz
