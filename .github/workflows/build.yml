@@ -2,7 +2,7 @@ name: GitHub Actions Demo
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  .Explore-GitHub-Actions:
     runs-on: ubuntu-latest
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
@@ -17,7 +17,29 @@ jobs:
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
 
-  build:
+  Vars:
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{ steps.Vars.outputs.VERSION }}
+    steps:
+      - id: Vars
+        run: |
+          echo "ref_type: ${{ github.ref_type }}"
+          echo "ref: ${{ github.ref }}"
+          echo "sha: ${{ github.sha }}"
+          echo ""
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            VERSION=${CI_COMMIT_TAG:-""}
+            VERSION=${VERSION#"esp-v"}    # remove prefix in tags like `esp-v7.1.0_20221221`
+            VERSION=${VERSION#"esp-"}     # remove prefix in tags like `esp-develop-20221221`
+            VERSION=${VERSION//"-"/"_"}   # replace dashes with underscores in the version
+          else
+            VERSION=${{ github.sha }}
+          fi
+
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+
+  .Build:
     strategy:
       matrix:
         platform: [x86_64-linux-gnu, x86_64-apple-darwin12]
@@ -80,7 +102,7 @@ jobs:
           name: dist-dummy-qemu
           path: |
             dist
-  upload:
+  .Upload:
     needs: [ build ]
     runs-on: ubuntu-latest
     steps:
