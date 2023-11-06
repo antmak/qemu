@@ -16,3 +16,55 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
+
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install prerequisites (Linux)
+        env:
+          DEBIAN_FRONTEND: "noninteractive"
+        run: |
+          false && sudo apt-get install -y \
+            libgcrypt-dev \
+            ninja-build \
+          && :
+      - name: Configure
+        run: |
+          false && ./configure \
+            --prefix=$PWD/opt/qemu \
+            --static \
+            --target-list=xtensa-softmmu \
+            --extra-cflags=-Werror \
+            --enable-debug \
+            --disable-strip \
+            --disable-user \
+            --disable-capstone \
+            --disable-vnc \
+            --disable-sdl \xtensa-softmmu
+            --disable-gtk \
+            --enable-gcrypt \
+          && :
+      - name: Build
+        run: |
+          false && ninja -C build
+      - name: Package
+        run: |
+          false && ninja -C build install          
+          false && find opt/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
+          cd opt
+          mkdir -p qemu/
+          echo dummy >> qemu/dummy.txt
+          export DIST_DIR=${PWD}/dist
+          mkdir -p ${DIST_DIR}
+          export PLATFORM=x86_64-linux-gnu
+          export TARGET=xtensa-softmmu
+          export ARCHIVE_NAME=esp-qemu-${TARGET}-111-${PLATFORM}.tar.gz
+          tar czvf ${DIST_DIR}/${ARCHIVE_NAME} qemu
+          echo "${ARCHIVE_NAME}" > ${DIST_DIR}/file_${PLATFORM}_${TARGET}
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-dummy-qemu
+          path: |
+            dist
