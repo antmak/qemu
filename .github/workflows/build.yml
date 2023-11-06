@@ -115,9 +115,9 @@ jobs:
             echo "trace n $n"
             ls -l "$n"
             stat -c%s "${n}"
-            sz=$(stat -c%s "${n}") >> "${RELEASE_CHECKSUM_FILE}";
-            printf "# %s: %s bytes\n" "${n}" "${sz}" >> "${RELEASE_CHECKSUM_FILE}";
-            sha256sum -b "${n}" >> "${RELEASE_CHECKSUM_FILE}";
+            sz=$(stat -c%s "${n}")
+            printf "# %s: %s bytes\n" "${n}" "${sz}" >> "${RELEASE_CHECKSUM_FILE}"
+            sha256sum -b "${n}" >> "${RELEASE_CHECKSUM_FILE}"
           done
           DIST_FILE_LIST="${DIST_FILE_LIST} ${RELEASE_CHECKSUM_FILE}"
           # remove new lines from file list
