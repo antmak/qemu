@@ -29,25 +29,25 @@ jobs:
             libgcrypt-dev \
             ninja-build \
           && :
-      - name: Configure
-        run: |
-          true || ./configure \
-            --prefix=$PWD/opt/qemu \
-            --static \
-            --target-list=xtensa-softmmu \
-            --extra-cflags=-Werror \
-            --enable-debug \
-            --disable-strip \
-            --disable-user \
-            --disable-capstone \
-            --disable-vnc \
-            --disable-sdl \xtensa-softmmu
-            --disable-gtk \
-            --enable-gcrypt \
-          && :
-      - name: Build
-        run: |
-          true || ninja -C build
+      # - name: Configure
+      #   run: |
+      #     true || ./configure \
+      #       --prefix=$PWD/opt/qemu \
+      #       --static \
+      #       --target-list=xtensa-softmmu \
+      #       --extra-cflags=-Werror \
+      #       --enable-debug \
+      #       --disable-strip \
+      #       --disable-user \
+      #       --disable-capstone \
+      #       --disable-vnc \
+      #       --disable-sdl \xtensa-softmmu
+      #       --disable-gtk \
+      #       --enable-gcrypt \
+      #     && :
+      # - name: Build
+      #   run: |
+      #     true || ninja -C build
       - name: Package
         run: |
           true || ninja -C build install
