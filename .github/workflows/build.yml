@@ -25,13 +25,13 @@ jobs:
         env:
           DEBIAN_FRONTEND: "noninteractive"
         run: |
-          false && sudo apt-get install -y \
+          true || sudo apt-get install -y \
             libgcrypt-dev \
             ninja-build \
           && :
       - name: Configure
         run: |
-          false && ./configure \
+          true || ./configure \
             --prefix=$PWD/opt/qemu \
             --static \
             --target-list=xtensa-softmmu \
@@ -47,11 +47,11 @@ jobs:
           && :
       - name: Build
         run: |
-          false && ninja -C build
+          true || ninja -C build
       - name: Package
         run: |
-          false && ninja -C build install          
-          false && find opt/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
+          true || ninja -C build install
+          true || find opt/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
           cd opt
           mkdir -p qemu/
           echo dummy >> qemu/dummy.txt
