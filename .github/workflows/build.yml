@@ -85,15 +85,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create a source archive
+        id: create-source
         run: |
           DIST_VERSION=111
           CI_PROJECT_NAME=esp-qemu
           CI_REPOSITORY_URL="https://github.com/antmak/qemu.git"
           export RELEASE_CHECKSUM_FILE="${CI_PROJECT_NAME}-${DIST_VERSION}-checksum.sha256"
-          echo "::set-env name=RELEASE_CHECKSUM_FILE::$RELEASE_CHECKSUM_FILE"
+          echo "RELEASE_CHECKSUM_FILE=\"$RELEASE_CHECKSUM_FILE\"" >> "$GITHUB_OUTPUT"
           RELEASE_SRC_NAME="${CI_PROJECT_NAME}-${DIST_VERSION}-src"
           export RELEASE_SRC_FILE="${CI_PROJECT_NAME}-${DIST_VERSION}-src.gz"
-          echo "::set-env name=RELEASE_SRC_FILE::$RELEASE_SRC_FILE"
+          echo "RELEASE_SRC_FILE=\"$RELEASE_SRC_FILE\"" >> "$GITHUB_OUTPUT"
           rm -rf -- "${RELEASE_SRC_NAME}" "${RELEASE_SRC_FILE}"
           git clone --quiet --depth 1 --recurse-submodules --shallow-submodules ${CI_REPOSITORY_URL} "${RELEASE_SRC_NAME}"
           find "${RELEASE_SRC_NAME}" -name ".git" -type d -exec rm -rf -- "{}" +
@@ -107,6 +108,9 @@ jobs:
         with:
           name: dist-dummy-qemu
       - name: Create a checksum file
+        env:
+          RELEASE_CHECKSUM_FILE: ${{ steps.create-source.outputs.RELEASE_CHECKSUM_FILE }}
+          RELEASE_SRC_FILE: ${{ steps.create-source.outputs.RELEASE_SRC_FILE }}
         run: |
           echo DBG0
           echo $RELEASE_CHECKSUM_FILE
