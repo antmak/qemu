@@ -91,7 +91,7 @@ jobs:
           CI_REPOSITORY_URL="https://github.com/antmak/qemu.git"
           RELEASE_CHECKSUM_FILE="${CI_PROJECT_NAME}-${DIST_VERSION}-checksum.sha256"
           RELEASE_SRC_NAME="${CI_PROJECT_NAME}-${DIST_VERSION}-src"
-          RELEASE_SRC_FILE="${CI_PROJECT_NAME}-${DIST_VERSION}-src.gz
+          RELEASE_SRC_FILE="${CI_PROJECT_NAME}-${DIST_VERSION}-src.gz"
           rm -rf -- "${RELEASE_SRC_NAME}" "${RELEASE_SRC_FILE}"
           git clone --quiet --depth 1 --recurse-submodules --shallow-submodules ${CI_REPOSITORY_URL} "${RELEASE_SRC_NAME}"
           find "${RELEASE_SRC_NAME}" -name ".git" -type d -exec rm -rf -- "{}" +
