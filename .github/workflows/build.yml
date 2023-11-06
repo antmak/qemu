@@ -52,8 +52,8 @@ jobs:
         run: |
           true || ninja -C build install
           true || find opt/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
-          cd opt
-          mkdir -p qemu/
+          mkdir -p install/qemu/          
+          cd install/
           echo dummy >> qemu/dummy.txt
           export DIST_DIR=${PWD}/dist
           mkdir -p ${DIST_DIR}
