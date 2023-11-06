@@ -52,11 +52,11 @@ jobs:
         run: |
           true || ninja -C build install
           true || find opt/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
-          mkdir -p install/qemu/          
-          cd install/
-          echo dummy >> qemu/dummy.txt
+          mkdir -p install/qemu/
           export DIST_DIR=${PWD}/dist
           mkdir -p ${DIST_DIR}
+          cd install/
+          echo dummy >> qemu/dummy.txt
           export PLATFORM=x86_64-linux-gnu
           export TARGET=xtensa-softmmu
           export ARCHIVE_NAME=esp-qemu-${TARGET}-111-${PLATFORM}.tar.gz
