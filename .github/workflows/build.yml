@@ -88,4 +88,4 @@ jobs:
         with:
           name: dist-dummy-qemu
       - run: |
-          ls -l dist/
+          ls -l .
