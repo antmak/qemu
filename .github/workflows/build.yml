@@ -113,13 +113,13 @@ jobs:
           echo "DBG"
           echo "${DIST_FILE_LIST}"
           for n in $DIST_FILE_LIST; do
-            sz=$(stat -c%s "${n}") >> ${RELEASE_CHECKSUM_FILE};
-            printf "# %s: %s bytes\n" "${n}" "${sz}" >> ${RELEASE_CHECKSUM_FILE};
-            sha256sum -b "${n}" >> ${RELEASE_CHECKSUM_FILE};
+            sz=$(stat -c%s "${n}") >> "${RELEASE_CHECKSUM_FILE}";
+            printf "# %s: %s bytes\n" "${n}" "${sz}" >> "${RELEASE_CHECKSUM_FILE}";
+            sha256sum -b "${n}" >> "${RELEASE_CHECKSUM_FILE}";
           done
           DIST_FILE_LIST="${DIST_FILE_LIST} ${RELEASE_CHECKSUM_FILE}"
           # remove new lines from file list
           DIST_FILE_LIST="${DIST_FILE_LIST//$'\n'/ }"
-          cat ${RELEASE_CHECKSUM_FILE}"
+          cat "${RELEASE_CHECKSUM_FILE}"
           echo "DBG"
           echo "${DIST_FILE_LIST}"
