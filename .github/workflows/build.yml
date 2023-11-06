@@ -29,15 +29,17 @@ jobs:
           echo "sha: ${{ github.sha }}"
           echo ""
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            VERSION=${CI_COMMIT_TAG:-""}
+            VERSION=${{ github.ref }}
+            VERSION=${VERSION#"refs/tags/"}
             VERSION=${VERSION#"esp-v"}    # remove prefix in tags like `esp-v7.1.0_20221221`
             VERSION=${VERSION#"esp-"}     # remove prefix in tags like `esp-develop-20221221`
             VERSION=${VERSION//"-"/"_"}   # replace dashes with underscores in the version
           else
             VERSION=${{ github.sha }}
+            VERSION=${VERSION:0:8}
           fi
-
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo $VERSION
 
   # Build:
   #   strategy:
