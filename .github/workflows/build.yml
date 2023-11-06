@@ -41,6 +41,11 @@ jobs:
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
           echo $VERSION
 
+
+          echo ${{ github.repositoryUrl }}
+          echo ${{ github.repository }}
+          echo ${{ github.repository#"github.repository_owner/" }}
+
   # Build:
   #   strategy:
   #     matrix:
@@ -120,7 +125,7 @@ jobs:
   #         export RELEASE_SRC_FILE="${CI_PROJECT_NAME}-${DIST_VERSION}-src.gz"
   #         echo "RELEASE_SRC_FILE=$RELEASE_SRC_FILE" >> "$GITHUB_OUTPUT"
   #         rm -rf -- "${RELEASE_SRC_NAME}" "${RELEASE_SRC_FILE}"
-  #         git clone --quiet --depth 1 --recurse-submodules --shallow-submodules ${CI_REPOSITORY_URL} "${RELEASE_SRC_NAME}"
+  #         git clone --quiet --depth 1 --recurse-submodules --shallow-submodules ${{ github.repositoryUrl }} "${RELEASE_SRC_NAME}"
   #         find "${RELEASE_SRC_NAME}" -name ".git" -type d -exec rm -rf -- "{}" +
   #         find "${RELEASE_SRC_NAME}" -name .git\* -exec rm -rf -- {} +
   #         tar -czvf "${RELEASE_SRC_FILE}" "${RELEASE_SRC_NAME}" > src-tar-list.txt 2>&1
