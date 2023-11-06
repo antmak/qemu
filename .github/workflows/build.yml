@@ -18,6 +18,17 @@ jobs:
       - run: echo "🍏 This job's status is ${{ job.status }}."
 
   build:
+    strategy:
+      matrix:
+        platform: [x86_64-linux-gnu, x86_64-apple-darwin12]
+        target: [xtensa-softmmu, riscv32-softmmu, riscv32-linux-user]
+        # include:
+        #   - platform: macos-x86_64
+        #     target: xtensa-softmmu
+        #     extra_configure_args: "--disable-cocoa --disable-coreaudio"
+        #   - platform: linux-amd64
+        #     runs_on: ubuntu-18.04
+        #     extra_configure_args: "--extra-cflags=-Werror --disable-gtk"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -57,8 +68,8 @@ jobs:
           mkdir -p ${DIST_DIR}
           cd install/
           echo dummy >> qemu/dummy.txt
-          export PLATFORM=x86_64-linux-gnu
-          export TARGET=xtensa-softmmu
+          export PLATFORM=${{ matrix.platform }}
+          export TARGET=${{ matrix.target }}
           export ARCHIVE_NAME=esp-qemu-${TARGET}-111-${PLATFORM}.tar.gz
           tar czvf ${DIST_DIR}/${ARCHIVE_NAME} qemu
           echo "${ARCHIVE_NAME}" > ${DIST_DIR}/file_${PLATFORM}_${TARGET}
