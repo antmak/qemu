@@ -2,20 +2,20 @@ name: GitHub Actions Demo
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
 jobs:
-  .Explore-GitHub-Actions:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      - name: Check out repository code
-        uses: actions/checkout@v4
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+  # Explore-GitHub-Actions:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+  #     - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+  #     - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+  #     - name: Check out repository code
+  #       uses: actions/checkout@v4
+  #     - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+  #     - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+  #     - name: List files in the repository
+  #       run: |
+  #         ls ${{ github.workspace }}
+  #     - run: echo "🍏 This job's status is ${{ job.status }}."
 
   Vars:
     runs-on: ubuntu-latest
@@ -39,120 +39,120 @@ jobs:
 
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
 
-  .Build:
-    strategy:
-      matrix:
-        platform: [x86_64-linux-gnu, x86_64-apple-darwin12]
-        target: [xtensa-softmmu, riscv32-softmmu, riscv32-linux-user]
-        # include:
-        #   - platform: macos-x86_64
-        #     target: xtensa-softmmu
-        #     extra_configure_args: "--disable-cocoa --disable-coreaudio"
-        #   - platform: linux-amd64
-        #     runs_on: ubuntu-18.04
-        #     extra_configure_args: "--extra-cflags=-Werror --disable-gtk"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install prerequisites (Linux)
-        env:
-          DEBIAN_FRONTEND: "noninteractive"
-        run: |
-          true || sudo apt-get install -y \
-            libgcrypt-dev \
-            ninja-build \
-          && :
-      # - name: Configure
-      #   run: |
-      #     true || ./configure \
-      #       --prefix=$PWD/opt/qemu \
-      #       --static \
-      #       --target-list=xtensa-softmmu \
-      #       --extra-cflags=-Werror \
-      #       --enable-debug \
-      #       --disable-strip \
-      #       --disable-user \
-      #       --disable-capstone \
-      #       --disable-vnc \
-      #       --disable-sdl \xtensa-softmmu
-      #       --disable-gtk \
-      #       --enable-gcrypt \
-      #     && :
-      # - name: Build
-      #   run: |
-      #     true || ninja -C build
-      - name: Package
-        run: |
-          true || ninja -C build install
-          true || find opt/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
-          mkdir -p install/qemu/
-          export DIST_DIR=${PWD}/dist
-          mkdir -p ${DIST_DIR}
-          cd install/
-          echo dummy >> qemu/dummy.txt
-          export PLATFORM=${{ matrix.platform }}
-          export TARGET=${{ matrix.target }}
-          export ARCHIVE_NAME=esp-qemu-${TARGET}-111-${PLATFORM}.tar.gz
-          tar -czvf ${DIST_DIR}/${ARCHIVE_NAME} qemu
-          echo "${ARCHIVE_NAME}" > ${DIST_DIR}/file_${PLATFORM}_${TARGET}
-          echo adddddd >> ${DIST_DIR}/add.txt
-      - name: Archive production artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: dist-dummy-qemu
-          path: |
-            dist
-  .Upload:
-    needs: [ build ]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create a source archive
-        id: create-source
-        run: |
-          DIST_VERSION=111
-          CI_PROJECT_NAME=esp-qemu
-          CI_REPOSITORY_URL="https://github.com/antmak/qemu.git"
-          export RELEASE_CHECKSUM_FILE="${CI_PROJECT_NAME}-${DIST_VERSION}-checksum.sha256"
-          echo "RELEASE_CHECKSUM_FILE=$RELEASE_CHECKSUM_FILE" >> "$GITHUB_OUTPUT"
-          RELEASE_SRC_NAME="${CI_PROJECT_NAME}-${DIST_VERSION}-src"
-          export RELEASE_SRC_FILE="${CI_PROJECT_NAME}-${DIST_VERSION}-src.gz"
-          echo "RELEASE_SRC_FILE=$RELEASE_SRC_FILE" >> "$GITHUB_OUTPUT"
-          rm -rf -- "${RELEASE_SRC_NAME}" "${RELEASE_SRC_FILE}"
-          git clone --quiet --depth 1 --recurse-submodules --shallow-submodules ${CI_REPOSITORY_URL} "${RELEASE_SRC_NAME}"
-          find "${RELEASE_SRC_NAME}" -name ".git" -type d -exec rm -rf -- "{}" +
-          find "${RELEASE_SRC_NAME}" -name .git\* -exec rm -rf -- {} +
-          tar -czvf "${RELEASE_SRC_FILE}" "${RELEASE_SRC_NAME}" > src-tar-list.txt 2>&1
-          rm -rf -- "${RELEASE_SRC_NAME}"
-          ls -l
+  # Build:
+  #   strategy:
+  #     matrix:
+  #       platform: [x86_64-linux-gnu, x86_64-apple-darwin12]
+  #       target: [xtensa-softmmu, riscv32-softmmu, riscv32-linux-user]
+  #       # include:
+  #       #   - platform: macos-x86_64
+  #       #     target: xtensa-softmmu
+  #       #     extra_configure_args: "--disable-cocoa --disable-coreaudio"
+  #       #   - platform: linux-amd64
+  #       #     runs_on: ubuntu-18.04
+  #       #     extra_configure_args: "--extra-cflags=-Werror --disable-gtk"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Install prerequisites (Linux)
+  #       env:
+  #         DEBIAN_FRONTEND: "noninteractive"
+  #       run: |
+  #         true || sudo apt-get install -y \
+  #           libgcrypt-dev \
+  #           ninja-build \
+  #         && :
+  #     # - name: Configure
+  #     #   run: |
+  #     #     true || ./configure \
+  #     #       --prefix=$PWD/opt/qemu \
+  #     #       --static \
+  #     #       --target-list=xtensa-softmmu \
+  #     #       --extra-cflags=-Werror \
+  #     #       --enable-debug \
+  #     #       --disable-strip \
+  #     #       --disable-user \
+  #     #       --disable-capstone \
+  #     #       --disable-vnc \
+  #     #       --disable-sdl \xtensa-softmmu
+  #     #       --disable-gtk \
+  #     #       --enable-gcrypt \
+  #     #     && :
+  #     # - name: Build
+  #     #   run: |
+  #     #     true || ninja -C build
+  #     - name: Package
+  #       run: |
+  #         true || ninja -C build install
+  #         true || find opt/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
+  #         mkdir -p install/qemu/
+  #         export DIST_DIR=${PWD}/dist
+  #         mkdir -p ${DIST_DIR}
+  #         cd install/
+  #         echo dummy >> qemu/dummy.txt
+  #         export PLATFORM=${{ matrix.platform }}
+  #         export TARGET=${{ matrix.target }}
+  #         export ARCHIVE_NAME=esp-qemu-${TARGET}-111-${PLATFORM}.tar.gz
+  #         tar -czvf ${DIST_DIR}/${ARCHIVE_NAME} qemu
+  #         echo "${ARCHIVE_NAME}" > ${DIST_DIR}/file_${PLATFORM}_${TARGET}
+  #         echo adddddd >> ${DIST_DIR}/add.txt
+  #     - name: Archive production artifacts
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: dist-dummy-qemu
+  #         path: |
+  #           dist
+  # Upload:
+  #   needs: [ build ]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Create a source archive
+  #       id: create-source
+  #       run: |
+  #         DIST_VERSION=111
+  #         CI_PROJECT_NAME=esp-qemu
+  #         CI_REPOSITORY_URL="https://github.com/antmak/qemu.git"
+  #         export RELEASE_CHECKSUM_FILE="${CI_PROJECT_NAME}-${DIST_VERSION}-checksum.sha256"
+  #         echo "RELEASE_CHECKSUM_FILE=$RELEASE_CHECKSUM_FILE" >> "$GITHUB_OUTPUT"
+  #         RELEASE_SRC_NAME="${CI_PROJECT_NAME}-${DIST_VERSION}-src"
+  #         export RELEASE_SRC_FILE="${CI_PROJECT_NAME}-${DIST_VERSION}-src.gz"
+  #         echo "RELEASE_SRC_FILE=$RELEASE_SRC_FILE" >> "$GITHUB_OUTPUT"
+  #         rm -rf -- "${RELEASE_SRC_NAME}" "${RELEASE_SRC_FILE}"
+  #         git clone --quiet --depth 1 --recurse-submodules --shallow-submodules ${CI_REPOSITORY_URL} "${RELEASE_SRC_NAME}"
+  #         find "${RELEASE_SRC_NAME}" -name ".git" -type d -exec rm -rf -- "{}" +
+  #         find "${RELEASE_SRC_NAME}" -name .git\* -exec rm -rf -- {} +
+  #         tar -czvf "${RELEASE_SRC_FILE}" "${RELEASE_SRC_NAME}" > src-tar-list.txt 2>&1
+  #         rm -rf -- "${RELEASE_SRC_NAME}"
+  #         ls -l
 
 
-      - uses: actions/download-artifact@v3
-        with:
-          name: dist-dummy-qemu
-      - name: Create a checksum file
-        env:
-          RELEASE_CHECKSUM_FILE: ${{ steps.create-source.outputs.RELEASE_CHECKSUM_FILE }}
-          RELEASE_SRC_FILE: ${{ steps.create-source.outputs.RELEASE_SRC_FILE }}
-        run: |
-          echo DBG0
-          echo $RELEASE_CHECKSUM_FILE
-          echo $RELEASE_SRC_FILE
-          DIST_FILE_LIST=$(find . -name file_\* -exec cat {} \+)
-          DIST_FILE_LIST="${DIST_FILE_LIST} ${RELEASE_SRC_FILE}"
-          echo "DBG1"
-          echo "${DIST_FILE_LIST}"
-          ls -l .
-          for n in $DIST_FILE_LIST; do
-            echo "trace n $n"
-            ls -l "$n"
-            stat -c%s "${n}"
-            sz=$(stat -c%s "${n}")
-            printf "# %s: %s bytes\n" "${n}" "${sz}" >> "${RELEASE_CHECKSUM_FILE}"
-            sha256sum -b "${n}" >> "${RELEASE_CHECKSUM_FILE}"
-          done
-          DIST_FILE_LIST="${DIST_FILE_LIST} ${RELEASE_CHECKSUM_FILE}"
-          # remove new lines from file list
-          DIST_FILE_LIST="${DIST_FILE_LIST//$'\n'/ }"
-          cat "${RELEASE_CHECKSUM_FILE}"
-          echo "DBG2"
-          echo "${DIST_FILE_LIST}"
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: dist-dummy-qemu
+  #     - name: Create a checksum file
+  #       env:
+  #         RELEASE_CHECKSUM_FILE: ${{ steps.create-source.outputs.RELEASE_CHECKSUM_FILE }}
+  #         RELEASE_SRC_FILE: ${{ steps.create-source.outputs.RELEASE_SRC_FILE }}
+  #       run: |
+  #         echo DBG0
+  #         echo $RELEASE_CHECKSUM_FILE
+  #         echo $RELEASE_SRC_FILE
+  #         DIST_FILE_LIST=$(find . -name file_\* -exec cat {} \+)
+  #         DIST_FILE_LIST="${DIST_FILE_LIST} ${RELEASE_SRC_FILE}"
+  #         echo "DBG1"
+  #         echo "${DIST_FILE_LIST}"
+  #         ls -l .
+  #         for n in $DIST_FILE_LIST; do
+  #           echo "trace n $n"
+  #           ls -l "$n"
+  #           stat -c%s "${n}"
+  #           sz=$(stat -c%s "${n}")
+  #           printf "# %s: %s bytes\n" "${n}" "${sz}" >> "${RELEASE_CHECKSUM_FILE}"
+  #           sha256sum -b "${n}" >> "${RELEASE_CHECKSUM_FILE}"
+  #         done
+  #         DIST_FILE_LIST="${DIST_FILE_LIST} ${RELEASE_CHECKSUM_FILE}"
+  #         # remove new lines from file list
+  #         DIST_FILE_LIST="${DIST_FILE_LIST//$'\n'/ }"
+  #         cat "${RELEASE_CHECKSUM_FILE}"
+  #         echo "DBG2"
+  #         echo "${DIST_FILE_LIST}"
