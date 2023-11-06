@@ -80,3 +80,11 @@ jobs:
           name: dist-dummy-qemu
           path: |
             dist
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: dist-dummy-qemu
+      - run: |
+          ls -l dist/
