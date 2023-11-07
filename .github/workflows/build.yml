@@ -43,6 +43,12 @@ jobs:
 
           echo ${{ github.repositoryUrl }}
           echo ${{ github.repository }}
+          echo ${{ github.repository_owner }}
+          OWNER=${{ github.repository_owner }}
+          FULLNAME=${{ github.repository }}
+          PROJECT_NAME=${FULLNAME#"$OWNER/"}
+          echo $PROJECT_NAME
+
 
   # Build:
   #   strategy:
