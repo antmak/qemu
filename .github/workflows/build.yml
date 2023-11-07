@@ -53,6 +53,7 @@ jobs:
 
 
   Build:
+    needs: [ Vars ]
     strategy:
       matrix:
         platform: [x86_64-linux-gnu, x86_64-apple-darwin12]
@@ -96,8 +97,8 @@ jobs:
       #     true || ninja -C build
       - name: Package
         env:
-          VERSION: ${{ steps.Vars:outputs.VERSION }}
-          PROJECT_NAME: ${{ steps.Vars:outputs.PROJECT_NAME }}
+          VERSION: ${{ needs.Vars:outputs.VERSION }}
+          PROJECT_NAME: ${{ needs.Vars:outputs.PROJECT_NAME }}
         run: |
           true || ninja -C build install
           true || find opt/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
