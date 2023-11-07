@@ -47,7 +47,7 @@ jobs:
           echo "PROJECT_NAME=$PROJECT_NAME" >> "$GITHUB_OUTPUT"
           echo $PROJECT_NAME
 
-          REPOSITORY_URL=${{ github.repositoryUrl }}
+          REPOSITORY_URL=${{ github.server_url }}/${{ github.repository }}
           echo "REPOSITORY_URL=$REPOSITORY_URL" >> "$GITHUB_OUTPUT"
           echo $REPOSITORY_URL
 
