@@ -21,8 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       VERSION: ${{ steps.Vars.outputs.VERSION }}
-      PROJECT_NAME: ${{ steps.Vars:outputs.PROJECT_NAME }}
-      REPOSITORY_URL: ${{ steps.Vars:outputs.REPOSITORY_URL }}
+      PROJECT_NAME: ${{ steps.Vars.outputs.PROJECT_NAME }}
+      REPOSITORY_URL: ${{ steps.Vars.outputs.REPOSITORY_URL }}
     steps:
       - id: Vars
         run: |
@@ -97,8 +97,8 @@ jobs:
       #     true || ninja -C build
       - name: Package
         env:
-          VERSION: ${{ needs.Vars:outputs.VERSION }}
-          PROJECT_NAME: ${{ needs.Vars:outputs.PROJECT_NAME }}
+          VERSION: ${{ needs.Vars.outputs.VERSION }}
+          PROJECT_NAME: ${{ needs.Vars.outputs.PROJECT_NAME }}
         run: |
           true || ninja -C build install
           true || find opt/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
