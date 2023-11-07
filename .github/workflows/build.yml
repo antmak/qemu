@@ -31,8 +31,6 @@ jobs:
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
             VERSION=${{ github.ref }}
             VERSION=${VERSION#"refs/tags/"}
-            VERSION=${VERSION#"esp-v"}    # remove prefix in tags like `esp-v7.1.0_20221221`
-            VERSION=${VERSION#"esp-"}     # remove prefix in tags like `esp-develop-20221221`
             VERSION=${VERSION//"-"/"_"}   # replace dashes with underscores in the version
           else
             VERSION=${{ github.sha }}
@@ -42,9 +40,10 @@ jobs:
           echo $VERSION
 
 
+
           echo ${{ github.repositoryUrl }}
           echo ${{ github.repository }}
-          echo ${{ github.repository#"github.repository_owner/" }}
+          #echo ${{ github.repository#"github.repository_owner/" }}
 
   # Build:
   #   strategy:
