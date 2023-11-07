@@ -3,7 +3,7 @@ name: 'build'
 on: [push, pull_request]
 
 jobs:
-  build:
+  Build:
     env:
       MSYSTEM: MINGW64
       CHERE_INVOKING: 'yes'
@@ -12,10 +12,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: macos-x86_64
-            runs_on: macos-12
-            extra_configure_args: "--disable-cocoa --disable-coreaudio --python=python3.11"
-            shell: bash -e {0}
+          #- platform: macos-x86_64
+          #  runs_on: macos-12
+          #  extra_configure_args: "--disable-cocoa --disable-coreaudio --python=python3.11"
+          #  shell: bash -e {0}
           # - platform: macos-arm64
           #   runs_on: macos-latest-xlarge
           #   extra_configure_args: "--disable-cocoa --disable-coreaudio"
@@ -28,6 +28,7 @@ jobs:
           #   shell: bash -e {0}
           - platform: linux-arm64
             runs_on: ubuntu-20.04
+            container: ubuntu:20.04
             extra_configure_args: "--disable-gtk --cross-prefix=aarch64-linux-gnu-"
             shell: bash -e {0}
           # - platform: win-x86_64
@@ -35,85 +36,70 @@ jobs:
           #   extra_configure_args: ""
           #   shell: msys2 {0}
     runs-on: ${{ matrix.runs_on }}
+    container: ${{ matrix.container }}
     defaults:
       run:
         shell: ${{ matrix.shell }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
       - name: Install prerequisites (Linux arm64)
         if: ${{ matrix.platform == 'linux-arm64' }}
-        env:
-          DEBIAN_FRONTEND: "noninteractive"
+        working-directory: .github/workflows/scripts
         run: |
-          # add ports.ubuntu.com to apt mirrors
-          cat /etc/apt/apt-mirrors.txt
-          sudo su -c 'echo "http://ports.ubuntu.com/ubuntu-ports/ priority: 1" > /etc/apt/apt-mirrors.txt'
-          cat /etc/apt/apt-mirrors.txt
-          sudo dpkg --add-architecture arm64
-          sudo apt-get update || true
-          sudo apt-get install -q --no-install-recommends \
-              ninja-build \
-              crossbuild-essential-arm64 \
-              gcc-aarch64-linux-gnu \
-              binutils-dev:arm64 \
-              libgcrypt-dev:arm64 \
-              libglib2.0-dev:arm64 \
-              libpixman-1-dev:arm64 \
-              libslirp-dev:arm64
-      - name: Install prerequisites (Linux x86_64)
-        if: ${{ matrix.platform == 'linux-amd64' }}
-        env:
-          DEBIAN_FRONTEND: "noninteractive"
-        run: |
-          sudo apt-get install -y -q --no-install-recommends \
-              binutils-dev \
-              ninja-build \
-              libgcrypt-dev \
-              libglib2.0-dev \
-              libpixman-1-dev \
-              libslirp-dev
-      - name: Install prerequisites (macOS)
-        if: ${{ matrix.platform == 'macos-x86_64' || matrix.platform == 'macos-arm64' }}
-        run: |
-          brew install \
-              ninja \
-              libgcrypt \
-              glib \
-              pixman \
-              pkg-config \
-              python@3.11
-          brew link --overwrite python@3.11
-      - name: Install prerequisites (Windows)
-        if : ${{ matrix.platform == 'win-x86_64' }}
-        uses: msys2/setup-msys2@v2
-        with:
-          cache: true
-          msystem: mingw64
-          install: >-
-            mingw-w64-x86_64-python
-            mingw-w64-x86_64-ninja
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-glib2
-            mingw-w64-x86_64-pkg-config
-            mingw-w64-x86_64-pixman
-            mingw-w64-x86_64-libgcrypt
-            mingw-w64-x86_64-libslirp
-            diffutils git
-      - name: Patch meson.build (macOS)
-        if: ${{ matrix.platform == 'macos-x86_64' || matrix.platform == 'macos-arm64' }}
-        run: |
-          sed -i '' "s/project('qemu', \['c'\],/project('qemu', ['c', 'objc'],/" meson.build
+          readlink -f .
+          ./prerequisites-cross-linux-arm64.sh
+
+
+      # - name: Install prerequisites (Linux x86_64)
+      #   if: ${{ matrix.platform == 'linux-amd64' }}
+      #   env:
+      #     DEBIAN_FRONTEND: "noninteractive"
+      #   run: |
+      #     sudo apt-get install -y -q --no-install-recommends \
+      #         binutils-dev \
+      #         ninja-build \
+      #         libgcrypt-dev \
+      #         libglib2.0-dev \
+      #         libpixman-1-dev \
+      #         libslirp-dev
+      # - name: Install prerequisites (macOS)
+      #   if: ${{ matrix.platform == 'macos-x86_64' || matrix.platform == 'macos-arm64' }}
+      #   run: |
+      #     brew install \
+      #         ninja \
+      #         libgcrypt \
+      #         glib \
+      #         pixman \
+      #         pkg-config \
+      #         python@3.11
+      #     brew link --overwrite python@3.11
+      # - name: Install prerequisites (Windows)
+      #   if : ${{ matrix.platform == 'win-x86_64' }}
+      #   uses: msys2/setup-msys2@v2
+      #   with:
+      #     cache: true
+      #     msystem: mingw64
+      #     install: >-
+      #       mingw-w64-x86_64-python
+      #       mingw-w64-x86_64-ninja
+      #       mingw-w64-x86_64-gcc
+      #       mingw-w64-x86_64-glib2
+      #       mingw-w64-x86_64-pkg-config
+      #       mingw-w64-x86_64-pixman
+      #       mingw-w64-x86_64-libgcrypt
+      #       mingw-w64-x86_64-libslirp
+      #       diffutils git
+      # - name: Patch meson.build (macOS)
+      #   if: ${{ matrix.platform == 'macos-x86_64' || matrix.platform == 'macos-arm64' }}
+      #   run: |
+      #     sed -i '' "s/project('qemu', \['c'\],/project('qemu', ['c', 'objc'],/" meson.build
       - name: Configure
         run: |
-          which -a python
-          export PATH=$(brew --prefix python)/bin:$PATH
-          which -a python3
-          python3 --version
-          head -n 1 /usr/local/Cellar/glib/2.78.1/bin/gdbus-codegen || true
           ./configure \
             --prefix=$PWD/install/qemu \
             --target-list=xtensa-softmmu \
-            --with-pkgversion="${{ github.ref_name }}" \
+            --with-pkgversion="esp_13.1.1_20231107" \
             --enable-gcrypt \
             --enable-slirp \
             --disable-user \
@@ -124,16 +110,15 @@ jobs:
             ${{ matrix.extra_configure_args }} || (cat meson-logs/meson-log.txt && false)
       - name: Build
         run: |
-          export PATH=$(brew --prefix python)/bin:$PATH
           ninja -C build
-      - name: Package distribution archive
-        run: |
-          ninja -C build install
-          find install/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
-          mkdir -p dist
-          export DIST_DIR=${PWD}/dist
-          export ARCHIVE_NAME=qemu-${{ github.ref_name }}-${{ matrix.platform }}.tar.bz2
-          cd install
-          tar cjvf ${DIST_DIR}/${ARCHIVE_NAME} qemu
-          cd ${DIST_DIR}
-          shasum -a 256 *.tar.bz2 > ${ARCHIVE_NAME}.sha256
+      # - name: Package distribution archive
+      #   run: |
+      #     ninja -C build install
+      #     find install/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
+      #     mkdir -p dist
+      #     export DIST_DIR=${PWD}/dist
+      #     export ARCHIVE_NAME=qemu-${{ github.ref_name }}-${{ matrix.platform }}.tar.bz2
+      #     cd install
+      #     tar cjvf ${DIST_DIR}/${ARCHIVE_NAME} qemu
+      #     cd ${DIST_DIR}
+      #     shasum -a 256 *.tar.bz2 > ${ARCHIVE_NAME}.sha256
