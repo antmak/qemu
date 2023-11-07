@@ -43,7 +43,6 @@ jobs:
 
           echo ${{ github.repositoryUrl }}
           echo ${{ github.repository }}
-          #echo ${{ github.repository#"github.repository_owner/" }}
 
   # Build:
   #   strategy:
