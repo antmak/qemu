@@ -136,7 +136,7 @@ jobs:
           export RELEASE_SRC_FILE="${PROJECT_NAME}-${VERSION}-src.tar.gz"
           echo "RELEASE_SRC_FILE=$RELEASE_SRC_FILE" >> "$GITHUB_OUTPUT"
           rm -rf -- "${RELEASE_SRC_NAME}" "${RELEASE_SRC_FILE}"
-          true || git clone --quiet --depth 1 --recurse-submodules --shallow-submodules ${REPOSITORY_URL} "${RELEASE_SRC_NAME}"
+          true || git clone --quiet --depth 1 --recurse-submodules --shallow-submodules "${REPOSITORY_URL}" "${RELEASE_SRC_NAME}"
           mkdir -p ${RELEASE_SRC_NAME} && echo "src" >> ${RELEASE_SRC_NAME}/dummy-src
           find "${RELEASE_SRC_NAME}" -name ".git" -type d -exec rm -rf -- "{}" +
           find "${RELEASE_SRC_NAME}" -name .git\* -exec rm -rf -- {} +
@@ -147,6 +147,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: dist-dummy-qemu
+
       - name: Create a checksum file
         env:
           RELEASE_CHECKSUM_FILE: ${{ steps.create-source.outputs.RELEASE_CHECKSUM_FILE }}
@@ -173,8 +174,9 @@ jobs:
           DIST_FILE_LIST="${DIST_FILE_LIST//$'\n'/ }"
           cat "${RELEASE_CHECKSUM_FILE}"
           echo "DBG2"
-          rm -rf tmp && mkdir -p tmp && mv -v ${DIST_FILE_LIST} tmp/
-        - name: Release
+          rm -rf -- tmp && mkdir -p tmp && mv -v ${DIST_FILE_LIST} tmp/
+
+      - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
