@@ -112,10 +112,10 @@ jobs:
           PLATFORM: ${{ matrix.platform }}
           TARGET: ${{ matrix.target }}
         run: |
-          true || find $PWD/install/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
+          find $PWD/install/qemu/share/qemu/ -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
           export DIST_DIR=${PWD}/dist
           mkdir -p ${DIST_DIR}
-          cd install/
+          cd $PWD/install
           ls -l qemu/ || :
           ls -l qemu/* || :
           ARCHIVE_NAME=${PROJECT_NAME}-${TARGET}-${VERSION}-${PLATFORM}.tar.bz2
@@ -129,14 +129,71 @@ jobs:
           path: |
             dist
 
-      # - name: Package distribution archive
-      #   run: |
-      #     ninja -C build install
-      #     find install/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
-      #     mkdir -p dist
-      #     export DIST_DIR=${PWD}/dist
-      #     export ARCHIVE_NAME=qemu-${{ github.ref_name }}-${{ matrix.platform }}.tar.bz2
-      #     cd install
-      #     tar cjvf ${DIST_DIR}/${ARCHIVE_NAME} qemu
-      #     cd ${DIST_DIR}
-      #     shasum -a 256 *.tar.bz2 > ${ARCHIVE_NAME}.sha256
+  Upload:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [ Vars, Build ]
+    runs-on: ubuntu-latest
+    steps :
+      - name: Create a source archive
+        id: create-source
+        env:
+          VERSION: ${{ needs.Vars.outputs.VERSION }}
+          PROJECT_NAME: ${{ needs.Vars.outputs.PROJECT_NAME }}
+          REPOSITORY_URL: ${{ needs.Vars.outputs.REPOSITORY_URL }}
+        run: |
+          export RELEASE_CHECKSUM_FILE="${PROJECT_NAME}-${VERSION}-checksum.sha256"
+          echo "RELEASE_CHECKSUM_FILE=$RELEASE_CHECKSUM_FILE" >> "$GITHUB_OUTPUT"
+          RELEASE_SRC_NAME="${PROJECT_NAME}-${VERSION}-src"
+          export RELEASE_SRC_FILE="${PROJECT_NAME}-${VERSION}-src.tar.bz2"
+          echo "RELEASE_SRC_FILE=$RELEASE_SRC_FILE" >> "$GITHUB_OUTPUT"
+          rm -rf -- "${RELEASE_SRC_NAME}" "${RELEASE_SRC_FILE}"
+          git clone --quiet --depth 1 --recurse-submodules --shallow-submodules "${REPOSITORY_URL}" "${RELEASE_SRC_NAME}"
+          find "${RELEASE_SRC_NAME}" -name ".git" -type d -exec rm -rf -- "{}" +
+          find "${RELEASE_SRC_NAME}" -name .git\* -exec rm -rf -- {} +
+          tar -cjvf "${RELEASE_SRC_FILE}" "${RELEASE_SRC_NAME}" > src-tar-list.txt 2>&1
+          rm -rf -- "${RELEASE_SRC_NAME}"
+          ls -l
+
+      - name: Source list artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: src-tar-list
+          path: |
+            src-tar-list.txt
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: dist-qemu
+
+      - name: Create a checksum file
+        env:
+          RELEASE_CHECKSUM_FILE: ${{ steps.create-source.outputs.RELEASE_CHECKSUM_FILE }}
+          RELEASE_SRC_FILE: ${{ steps.create-source.outputs.RELEASE_SRC_FILE }}
+        run: |
+          echo DBG0
+          echo $RELEASE_CHECKSUM_FILE
+          echo $RELEASE_SRC_FILE
+          DIST_FILE_LIST=$(find . -name file_\* -exec cat {} \+)
+          DIST_FILE_LIST="${DIST_FILE_LIST} ${RELEASE_SRC_FILE}"
+          echo "DBG1"
+          echo "${DIST_FILE_LIST}"
+          ls -l .
+          for n in $DIST_FILE_LIST; do
+            echo "trace n $n"
+            ls -l "$n"
+            stat -c%s "${n}"
+            sz=$(stat -c%s "${n}")
+            printf "# %s: %s bytes\n" "${n}" "${sz}" >> "${RELEASE_CHECKSUM_FILE}"
+            sha256sum -b "${n}" >> "${RELEASE_CHECKSUM_FILE}"
+          done
+          DIST_FILE_LIST="${DIST_FILE_LIST} ${RELEASE_CHECKSUM_FILE}"
+          # remove new lines from file list
+          DIST_FILE_LIST="${DIST_FILE_LIST//$'\n'/ }"
+          cat "${RELEASE_CHECKSUM_FILE}"
+          echo "DBG2"
+          rm -rf -- tmp && mkdir -p tmp && mv -v ${DIST_FILE_LIST} tmp/
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: tmp/*
