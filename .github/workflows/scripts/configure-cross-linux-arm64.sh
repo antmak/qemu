@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-## # replace libgcrypt method to 'pkg-config'
-## sed -z -i "s/\(.*dependency('libgcrypt'.*method: '\)config-tool\('.*\)/\1pkg-config\2/g" -- meson.build
+# replace libgcrypt method to 'pkg-config'
+sed -z -i "s/\(.*dependency('libgcrypt'.*method: '\)config-tool\('.*\)/\1pkg-config\2/g" -- meson.build
 
 ./configure \
     --prefix=$PWD/install/qemu \
