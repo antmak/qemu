@@ -40,4 +40,4 @@ apt-get update \
 && :
 
 # ?
-/usr/bin/pip3 install meson
+/usr/bin/pip3 install meson==1.2.3

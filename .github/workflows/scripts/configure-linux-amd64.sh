@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-# replace libgcrypt method to 'pkg-config'
-sed -z -i "s/\(.*dependency('libgcrypt'.*method: '\)config-tool\('.*\)/\1pkg-config\2/g" -- meson.build
+#FIXME ? disable-docs
 
 ./configure \
-    --cross-prefix=aarch64-linux-gnu- \
     --disable-capstone \
     --disable-docs \
     --disable-gtk \
@@ -13,6 +11,7 @@ sed -z -i "s/\(.*dependency('libgcrypt'.*method: '\)config-tool\('.*\)/\1pkg-con
     --disable-vnc \
     --enable-gcrypt \
     --enable-slirp \
+    --extra-cflags=-Werror \
     --prefix=$PWD/install/qemu \
     --target-list=xtensa-softmmu \
     --with-pkgversion="esp_13.1.1_20231107" \
