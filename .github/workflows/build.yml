@@ -30,7 +30,7 @@ jobs:
             runs_on: ubuntu-20.04
             # Used the blank docker-hub's image instead of the heavy GitHub's one for correct croossbuild prerequisites
             container: ubuntu:20.04
-            extra_configure_args: "--disable-gtk --cross-prefix=aarch64-linux-gnu-"
+            #extra_configure_args: "--disable-gtk --cross-prefix=aarch64-linux-gnu-"
             shell: bash -e {0}
           # - platform: win-x86_64
           #   runs_on: windows-2022
