@@ -103,7 +103,7 @@ jobs:
 
       - name: Build (${{ matrix.target }} @ ${{ matrix.platform }})
         run: |
-          ninja -C build
+          ninja -C build install
 
       - name: Package (${{ matrix.target }} @ ${{ matrix.platform }})
         env:
@@ -116,14 +116,14 @@ jobs:
           export DIST_DIR=${PWD}/dist
           mkdir -p ${DIST_DIR}
           cd install/
-          export ARCHIVE_NAME=${PROJECT_NAME}-${TARGET}-${VERSION}-${PLATFORM}.tar.gz
-          tar -czvf ${DIST_DIR}/${ARCHIVE_NAME} qemu
+          export ARCHIVE_NAME=${PROJECT_NAME}-${TARGET}-${VERSION}-${PLATFORM}.tar.bz2
+          tar -cjvf ${DIST_DIR}/${ARCHIVE_NAME} qemu
           echo "${ARCHIVE_NAME}" > ${DIST_DIR}/file_${PLATFORM}_${TARGET}
 
       - name: Archive production artifacts (${{ matrix.target }} @ ${{ matrix.platform }})
         uses: actions/upload-artifact@v3
         with:
-          name: dist-dummy-qemu
+          name: dist-qemu
           path: |
             dist
 
