@@ -4,10 +4,6 @@ on: [push, pull_request]
 
 jobs:
   Build:
-    env:
-      MSYSTEM: MINGW64
-      CHERE_INVOKING: 'yes'
-      MSYS: 'winsymlinks:native'
     strategy:
       fail-fast: false
       matrix:
@@ -25,14 +21,19 @@ jobs:
           #   shell: bash -e {0}
           - platform: x86_64-linux-gnu
             runs_on: ubuntu-20.04
+            run_prerequisites: "sudo ./.github/workflows/scripts/prerequisites-linux-amd64.sh"
+            run_configure: "./.github/workflows/scripts/configure-linux-amd64.sh"
             # Building with -Werror only on Linux as that breaks some features detection
             # in meson on macOS.
             #extra_configure_args: "--extra-cflags=-Werror --disable-gtk"
             shell: bash -e {0}
+
           - platform: aarch64-linux-gnu
             runs_on: ubuntu-20.04
             # Used the minimal docker-hub's image instead of the heavy GitHub's one for correct croossbuild prerequisites
             container: ubuntu:20.04
+            run_prerequisites: "./.github/workflows/scripts/prerequisites-cross-linux-arm64.sh"
+            run_configure: "./.github/workflows/scripts/configure-cross-linux-arm64.sh"
             #extra_configure_args: "--disable-gtk --cross-prefix=aarch64-linux-gnu-"
             shell: bash -e {0}
           # - platform: win-x86_64
@@ -47,16 +48,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install prerequisites (Linux x86_64)
-        if: ${{ matrix.platform == 'x86_64-linux-gnu' }}
+      - name: Install prerequisites (${{ matrix.platform }})
         run: |
-          ./.github/workflows/scripts/prerequisites-linux-amd64.sh
-
-      - name: Install prerequisites (Linux arm64)
-        if: ${{ matrix.platform == 'aarch64-linux-gnu' }}
-        run: |
-          ./.github/workflows/scripts/prerequisites-cross-linux-arm64.sh
-
+          echo "DBG0"
+          echo ${{ matrix.container }}
+          echo ${{ matrix.runs_on }}
+          ${{ matrix.run_prerequisites }}
 
       # - name: Install prerequisites (Linux x86_64)
       #   if: ${{ matrix.platform == 'linux-amd64' }}
@@ -102,19 +99,17 @@ jobs:
       #   run: |
       #     sed -i '' "s/project('qemu', \['c'\],/project('qemu', ['c', 'objc'],/" meson.build
 
-      - name: Configure (Linux x86_64)
-        if: ${{ matrix.platform == 'x86_64-linux-gnu' }}
+      - name: Configure (${{ matrix.platform }})
         run: |
-          ./.github/workflows/scripts/configure-cross-linux-arm64.sh
-
-      - name: Configure (Linux arm64)
-        if: ${{ matrix.platform == 'aarch64-linux-gnu' }}
-        run: |
-          ./.github/workflows/scripts/configure-cross-linux-arm64.sh
+          echo "DBG0"
+          echo ${{ matrix.container }}
+          echo ${{ matrix.runs_on }}
+          ${{ matrix.run_configure }}
 
       - name: Build
         run: |
           ninja -C build
+
       # - name: Package distribution archive
       #   run: |
       #     ninja -C build install
