@@ -46,9 +46,8 @@ jobs:
 
       - name: Install prerequisites (Linux arm64)
         if: ${{ matrix.platform == 'linux-arm64' }}
-        working-directory: .github/workflows/scripts
         run: |
-          ./prerequisites-cross-linux-arm64.sh
+          ./.github/workflows/scripts/prerequisites-cross-linux-arm64.sh
 
 
       # - name: Install prerequisites (Linux x86_64)
@@ -96,9 +95,8 @@ jobs:
       #     sed -i '' "s/project('qemu', \['c'\],/project('qemu', ['c', 'objc'],/" meson.build
       - name: Configure (Linux arm64)
         if: ${{ matrix.platform == 'linux-arm64' }}
-        working-directory: .github/workflows/scripts
         run: |
-          ./configure-cross-linux-arm64.sh
+          ./.github/workflows/scripts/configure-cross-linux-arm64.sh
 
       - name: Build
         run: |
