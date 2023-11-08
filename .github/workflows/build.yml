@@ -28,6 +28,7 @@ jobs:
           #   shell: bash -e {0}
           - platform: linux-arm64
             runs_on: ubuntu-20.04
+            # The blank docker-hub image for croossbuild packages instead of the heavy GitHub's one
             container: ubuntu:20.04
             extra_configure_args: "--disable-gtk --cross-prefix=aarch64-linux-gnu-"
             shell: bash -e {0}
@@ -47,7 +48,6 @@ jobs:
         if: ${{ matrix.platform == 'linux-arm64' }}
         working-directory: .github/workflows/scripts
         run: |
-          readlink -f .
           ./prerequisites-cross-linux-arm64.sh
 
 
@@ -94,20 +94,12 @@ jobs:
       #   if: ${{ matrix.platform == 'macos-x86_64' || matrix.platform == 'macos-arm64' }}
       #   run: |
       #     sed -i '' "s/project('qemu', \['c'\],/project('qemu', ['c', 'objc'],/" meson.build
-      - name: Configure
+      - name: Configure (Linux arm64)
+        if: ${{ matrix.platform == 'linux-arm64' }}
+        working-directory: .github/workflows/scripts
         run: |
-          ./configure \
-            --prefix=$PWD/install/qemu \
-            --target-list=xtensa-softmmu \
-            --with-pkgversion="esp_13.1.1_20231107" \
-            --enable-gcrypt \
-            --enable-slirp \
-            --disable-user \
-            --disable-capstone \
-            --disable-vnc \
-            --disable-sdl \
-            --disable-docs \
-            ${{ matrix.extra_configure_args }} || (cat meson-logs/meson-log.txt && false)
+          ./configure-cross-linux-arm64.sh
+
       - name: Build
         run: |
           ninja -C build

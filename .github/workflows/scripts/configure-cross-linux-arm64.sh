@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# replace libgcrypt method to 'pkg-config'
-sed -z -i "s/\(.*dependency('libgcrypt'.*method: '\)config-tool\('.*\)/\1pkg-config\2/g" -- meson.build
+## # replace libgcrypt method to 'pkg-config'
+## sed -z -i "s/\(.*dependency('libgcrypt'.*method: '\)config-tool\('.*\)/\1pkg-config\2/g" -- meson.build
 
 ./configure \
     --prefix=$PWD/install/qemu \
@@ -16,7 +16,4 @@ sed -z -i "s/\(.*dependency('libgcrypt'.*method: '\)config-tool\('.*\)/\1pkg-con
     --disable-docs \
     --disable-gtk \
     --cross-prefix=aarch64-linux-gnu- \
-&& :
-
-
-    #(cat meson-logs/meson-log.txt && false)
+|| { cat meson-logs/meson-log.txt && false; }
