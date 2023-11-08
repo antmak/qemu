@@ -26,19 +26,19 @@ test -f /etc/apt/apt-mirrors.txt && cat /etc/apt/apt-mirrors.txt | grep -v "^#"
 
 apt-get update \
 && apt-get install -y -q --no-install-recommends \
-  binutils-aarch64-linux-gnu \
-  build-essential \
-  crossbuild-essential-arm64 \
-  gcc-aarch64-linux-gnu \
-  git \
-  libgcrypt20-dev:arm64 \
-  libglib2.0-dev:arm64 \
-  libgpg-error-dev:arm64 \
-  libpixman-1-dev:arm64 \
-  libslirp-dev:arm64 \
-  ninja-build \
-  python3-pip \
-  zlib1g-dev:arm64 \
+    binutils-aarch64-linux-gnu \
+    build-essential \
+    crossbuild-essential-arm64 \
+    gcc-aarch64-linux-gnu \
+    git \
+    libgcrypt20-dev:arm64 \
+    libglib2.0-dev:arm64 \
+    libgpg-error-dev:arm64 \
+    libpixman-1-dev:arm64 \
+    libslirp-dev:arm64 \
+    ninja-build \
+    python3-pip \
+    zlib1g-dev:arm64 \
 && :
 
 # ?

@@ -5,6 +5,9 @@ set -euo pipefail
 echo "DBG configure TARGET: ${TARGET:-}"
 TARGET=${TARGET:-xtensa-softmmu}
 
+echo "DBG configure VERSION: ${VERSION:-}"
+VERSION=${VERSION:-dev}
+
 #FIXME ? disable-docs
 ./configure \
     --disable-capstone \
@@ -16,7 +19,7 @@ TARGET=${TARGET:-xtensa-softmmu}
     --enable-gcrypt \
     --enable-slirp \
     --extra-cflags=-Werror \
-    --prefix=$PWD/install/qemu \
-    --target-list=$TARGET \
-    --with-pkgversion="esp_13.1.1_20231107" \
+    --prefix=${PWD}/install/qemu \
+    --target-list=${TARGET} \
+    --with-pkgversion="${VERSION}" \
 || { cat meson-logs/meson-log.txt && false; }

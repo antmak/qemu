@@ -3,7 +3,43 @@ name: 'build'
 on: [push, pull_request]
 
 jobs:
+
+  Vars:
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{ steps.Vars.outputs.VERSION }}
+      PROJECT_NAME: ${{ steps.Vars.outputs.PROJECT_NAME }}
+      REPOSITORY_URL: ${{ steps.Vars.outputs.REPOSITORY_URL }}
+    steps:
+      - id: Vars
+        run: |
+          echo "ref_type: ${{ github.ref_type }}"
+          echo "ref: ${{ github.ref }}"
+          echo "sha: ${{ github.sha }}"
+          echo ""
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            VERSION=${{ github.ref }}
+            VERSION=${VERSION#"refs/tags/"}
+            VERSION=${VERSION//"-"/"_"}   # replace dashes with underscores in the version
+          else
+            VERSION=${{ github.sha }}
+            VERSION=g${VERSION:0:8}
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo $VERSION
+
+          OWNER=${{ github.repository_owner }}
+          FULLNAME=${{ github.repository }}
+          PROJECT_NAME=${FULLNAME#"$OWNER/"}
+          echo "PROJECT_NAME=$PROJECT_NAME" >> "$GITHUB_OUTPUT"
+          echo $PROJECT_NAME
+
+          REPOSITORY_URL=${{ github.server_url }}/${{ github.repository }}
+          echo "REPOSITORY_URL=$REPOSITORY_URL" >> "$GITHUB_OUTPUT"
+          echo $REPOSITORY_URL
+
   Build:
+    needs: [ Vars ]
     strategy:
       fail-fast: false
       matrix:
@@ -57,6 +93,7 @@ jobs:
 
       - name: Configure (${{ matrix.target }} @ ${{ matrix.platform }})
         env:
+          VERSION: ${{ needs.Vars.outputs.VERSION }}
           TARGET: ${{ matrix.target }}
         run: |
           echo "DBG0"
@@ -67,6 +104,28 @@ jobs:
       - name: Build (${{ matrix.target }} @ ${{ matrix.platform }})
         run: |
           ninja -C build
+
+      - name: Package (${{ matrix.target }} @ ${{ matrix.platform }})
+        env:
+          VERSION: ${{ needs.Vars.outputs.VERSION }}
+          PROJECT_NAME: ${{ needs.Vars.outputs.PROJECT_NAME }}
+          PLATFORM: ${{ matrix.platform }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          find $PWD/install/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
+          export DIST_DIR=${PWD}/dist
+          mkdir -p ${DIST_DIR}
+          cd install/
+          export ARCHIVE_NAME=${PROJECT_NAME}-${TARGET}-${VERSION}-${PLATFORM}.tar.gz
+          tar -czvf ${DIST_DIR}/${ARCHIVE_NAME} qemu
+          echo "${ARCHIVE_NAME}" > ${DIST_DIR}/file_${PLATFORM}_${TARGET}
+
+      - name: Archive production artifacts (${{ matrix.target }} @ ${{ matrix.platform }})
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-dummy-qemu
+          path: |
+            dist
 
       # - name: Package distribution archive
       #   run: |
