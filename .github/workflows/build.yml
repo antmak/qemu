@@ -8,7 +8,7 @@ jobs:
       fail-fast: false
       matrix:
         platform: [x86_64-linux-gnu, aarch64-linux-gnu]
-        #target: [xtensa-softmmu, riscv32-softmmu]
+        target: [xtensa-softmmu, riscv32-softmmu]
 
         include:
           #- platform: macos-x86_64
@@ -48,65 +48,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install prerequisites (${{ matrix.platform }})
+      - name: Install prerequisites (${{ matrix.target }} @ ${{ matrix.platform }})
         run: |
           echo "DBG0"
           echo ${{ matrix.container }}
           echo ${{ matrix.runs_on }}
           ${{ matrix.run_prerequisites }}
 
-      # - name: Install prerequisites (Linux x86_64)
-      #   if: ${{ matrix.platform == 'linux-amd64' }}
-      #   env:
-      #     DEBIAN_FRONTEND: "noninteractive"
-      #   run: |
-      #     sudo apt-get install -y -q --no-install-recommends \
-      #         binutils-dev \
-      #         ninja-build \
-      #         libgcrypt-dev \
-      #         libglib2.0-dev \
-      #         libpixman-1-dev \
-      #         libslirp-dev
-      # - name: Install prerequisites (macOS)
-      #   if: ${{ matrix.platform == 'macos-x86_64' || matrix.platform == 'macos-arm64' }}
-      #   run: |
-      #     brew install \
-      #         ninja \
-      #         libgcrypt \
-      #         glib \
-      #         pixman \
-      #         pkg-config \
-      #         python@3.11
-      #     brew link --overwrite python@3.11
-      # - name: Install prerequisites (Windows)
-      #   if : ${{ matrix.platform == 'win-x86_64' }}
-      #   uses: msys2/setup-msys2@v2
-      #   with:
-      #     cache: true
-      #     msystem: mingw64
-      #     install: >-
-      #       mingw-w64-x86_64-python
-      #       mingw-w64-x86_64-ninja
-      #       mingw-w64-x86_64-gcc
-      #       mingw-w64-x86_64-glib2
-      #       mingw-w64-x86_64-pkg-config
-      #       mingw-w64-x86_64-pixman
-      #       mingw-w64-x86_64-libgcrypt
-      #       mingw-w64-x86_64-libslirp
-      #       diffutils git
-      # - name: Patch meson.build (macOS)
-      #   if: ${{ matrix.platform == 'macos-x86_64' || matrix.platform == 'macos-arm64' }}
-      #   run: |
-      #     sed -i '' "s/project('qemu', \['c'\],/project('qemu', ['c', 'objc'],/" meson.build
-
-      - name: Configure (${{ matrix.platform }})
+      - name: Configure (${{ matrix.target }} @ ${{ matrix.platform }})
+        env:
+          TARGET: ${{ matrix.target }}
         run: |
           echo "DBG0"
           echo ${{ matrix.container }}
           echo ${{ matrix.runs_on }}
           ${{ matrix.run_configure }}
 
-      - name: Build
+      - name: Build (${{ matrix.target }} @ ${{ matrix.platform }})
         run: |
           ninja -C build
 

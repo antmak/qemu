@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
+echo "DBG configure TARGET: ${TARGET:-}"
+TARGET=${TARGET:-xtensa-softmmu}
+
 # replace libgcrypt method to 'pkg-config'
 sed -z -i "s/\(.*dependency('libgcrypt'.*method: '\)config-tool\('.*\)/\1pkg-config\2/g" -- meson.build
 
@@ -14,6 +19,6 @@ sed -z -i "s/\(.*dependency('libgcrypt'.*method: '\)config-tool\('.*\)/\1pkg-con
     --enable-gcrypt \
     --enable-slirp \
     --prefix=$PWD/install/qemu \
-    --target-list=xtensa-softmmu \
+    --target-list=$TARGET \
     --with-pkgversion="esp_13.1.1_20231107" \
 || { cat meson-logs/meson-log.txt && false; }

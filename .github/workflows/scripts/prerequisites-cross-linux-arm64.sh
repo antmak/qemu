@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 export DEBIAN_FRONTEND="noninteractive"
 
 EXTRA_APT_SOURCES="
