@@ -8,6 +8,8 @@ TARGET=${TARGET:-xtensa-softmmu}
 echo "DBG configure VERSION: ${VERSION:-}"
 VERSION=${VERSION:-dev}
 
+# Building with -Werror only on Linux as that breaks some features detection in meson on macOS.
+
 #FIXME ? disable-docs
 ./configure \
     --disable-capstone \

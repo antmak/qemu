@@ -47,21 +47,10 @@ jobs:
         target: [xtensa-softmmu, riscv32-softmmu]
 
         include:
-          #- platform: macos-x86_64
-          #  runs_on: macos-12
-          #  extra_configure_args: "--disable-cocoa --disable-coreaudio --python=python3.11"
-          #  shell: bash -e {0}
-          # - platform: macos-arm64
-          #   runs_on: macos-latest-xlarge
-          #   extra_configure_args: "--disable-cocoa --disable-coreaudio"
-          #   shell: bash -e {0}
           - platform: x86_64-linux-gnu
             runs_on: ubuntu-20.04
             run_prerequisites: "sudo ./.github/workflows/scripts/prerequisites-linux-amd64.sh"
             run_configure: "./.github/workflows/scripts/configure-linux-amd64.sh"
-            # Building with -Werror only on Linux as that breaks some features detection
-            # in meson on macOS.
-            #extra_configure_args: "--extra-cflags=-Werror --disable-gtk"
             shell: bash -e {0}
 
           - platform: aarch64-linux-gnu
@@ -70,12 +59,7 @@ jobs:
             container: ubuntu:20.04
             run_prerequisites: "./.github/workflows/scripts/prerequisites-cross-linux-arm64.sh"
             run_configure: "./.github/workflows/scripts/configure-cross-linux-arm64.sh"
-            #extra_configure_args: "--disable-gtk --cross-prefix=aarch64-linux-gnu-"
             shell: bash -e {0}
-          # - platform: win-x86_64
-          #   runs_on: windows-2022
-          #   extra_configure_args: ""
-          #   shell: msys2 {0}
     runs-on: ${{ matrix.runs_on }}
     container: ${{ matrix.container }}
     defaults:
@@ -86,9 +70,6 @@ jobs:
 
       - name: Install prerequisites (${{ matrix.target }} @ ${{ matrix.platform }})
         run: |
-          echo "DBG0"
-          echo ${{ matrix.container }}
-          echo ${{ matrix.runs_on }}
           ${{ matrix.run_prerequisites }}
 
       - name: Configure (${{ matrix.target }} @ ${{ matrix.platform }})
@@ -96,9 +77,6 @@ jobs:
           VERSION: ${{ needs.Vars.outputs.VERSION }}
           TARGET: ${{ matrix.target }}
         run: |
-          echo "DBG0"
-          echo ${{ matrix.container }}
-          echo ${{ matrix.runs_on }}
           ${{ matrix.run_configure }}
 
       - name: Build (${{ matrix.target }} @ ${{ matrix.platform }})
@@ -116,10 +94,8 @@ jobs:
           export DIST_DIR=${PWD}/dist
           mkdir -p ${DIST_DIR}
           cd $PWD/install
-          ls -l qemu/ || :
-          ls -l qemu/* || :
           ARCHIVE_NAME=${PROJECT_NAME}-${TARGET}-${VERSION}-${PLATFORM}.tar.bz2
-          tar -cjvf ${DIST_DIR}/${ARCHIVE_NAME} qemu > ${DIST_DIR}/tar-list-${TARGET}-${PLATFORM}.txt 2>&1
+          tar -cjvf ${DIST_DIR}/${ARCHIVE_NAME} qemu > ${DIST_DIR}/dist-list-${TARGET}-${PLATFORM}.txt 2>&1
           echo "${ARCHIVE_NAME}" > ${DIST_DIR}/file_${PLATFORM}_${TARGET}
 
       - name: Artifacts (${{ matrix.target }} @ ${{ matrix.platform }})
@@ -146,20 +122,21 @@ jobs:
           RELEASE_SRC_NAME="${PROJECT_NAME}-${VERSION}-src"
           export RELEASE_SRC_FILE="${PROJECT_NAME}-${VERSION}-src.tar.bz2"
           echo "RELEASE_SRC_FILE=$RELEASE_SRC_FILE" >> "$GITHUB_OUTPUT"
+
           rm -rf -- "${RELEASE_SRC_NAME}" "${RELEASE_SRC_FILE}"
           git clone --quiet --depth 1 --recurse-submodules --shallow-submodules "${REPOSITORY_URL}" "${RELEASE_SRC_NAME}"
           find "${RELEASE_SRC_NAME}" -name ".git" -type d -exec rm -rf -- "{}" +
           find "${RELEASE_SRC_NAME}" -name .git\* -exec rm -rf -- {} +
-          tar -cjvf "${RELEASE_SRC_FILE}" "${RELEASE_SRC_NAME}" > src-tar-list.txt 2>&1
+          tar -cjvf "${RELEASE_SRC_FILE}" "${RELEASE_SRC_NAME}" > src-list.txt 2>&1
           rm -rf -- "${RELEASE_SRC_NAME}"
           ls -l
 
       - name: Source list artifact
         uses: actions/upload-artifact@v3
         with:
-          name: src-tar-list
+          name: src-list
           path: |
-            src-tar-list.txt
+            src-list.txt
 
       - uses: actions/download-artifact@v3
         with:
@@ -170,17 +147,10 @@ jobs:
           RELEASE_CHECKSUM_FILE: ${{ steps.create-source.outputs.RELEASE_CHECKSUM_FILE }}
           RELEASE_SRC_FILE: ${{ steps.create-source.outputs.RELEASE_SRC_FILE }}
         run: |
-          echo DBG0
-          echo $RELEASE_CHECKSUM_FILE
-          echo $RELEASE_SRC_FILE
+          ls -l
           DIST_FILE_LIST=$(find . -name file_\* -exec cat {} \+)
           DIST_FILE_LIST="${DIST_FILE_LIST} ${RELEASE_SRC_FILE}"
-          echo "DBG1"
-          echo "${DIST_FILE_LIST}"
-          ls -l .
           for n in $DIST_FILE_LIST; do
-            echo "trace n $n"
-            ls -l "$n"
             stat -c%s "${n}"
             sz=$(stat -c%s "${n}")
             printf "# %s: %s bytes\n" "${n}" "${sz}" >> "${RELEASE_CHECKSUM_FILE}"
@@ -190,10 +160,9 @@ jobs:
           # remove new lines from file list
           DIST_FILE_LIST="${DIST_FILE_LIST//$'\n'/ }"
           cat "${RELEASE_CHECKSUM_FILE}"
-          echo "DBG2"
-          rm -rf -- tmp && mkdir -p tmp && mv -v ${DIST_FILE_LIST} tmp/
+          rm -rf -- upload && mkdir -p upload && mv -v ${DIST_FILE_LIST} upload/
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: tmp/*
+          files: upload/*

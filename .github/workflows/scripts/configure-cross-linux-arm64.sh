@@ -21,6 +21,7 @@ sed -z -i "s/\(.*dependency('libgcrypt'.*method: '\)config-tool\('.*\)/\1pkg-con
     --disable-vnc \
     --enable-gcrypt \
     --enable-slirp \
+    --extra-cflags=-Werror \
     --prefix=${PWD}/install/qemu \
     --target-list=${TARGET} \
     --with-pkgversion="${VERSION}" \
