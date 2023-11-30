@@ -5,22 +5,23 @@ set -euo pipefail
 TARGET=${TARGET:-xtensa-softmmu}
 VERSION=${VERSION:-dev}
 
-# Replacing libgcrypt method to 'pkg-config' for crossbuilding on Linux
-sed -z -i "s/\(.*dependency('libgcrypt'.*method: '\)config-tool\('.*\)/\1pkg-config\2/g" -- meson.build
+sed -i '' "s/project('qemu', \['c'\],/project('qemu', \['c', 'objc'\],/" meson.build
+
+# workaround for some headers that macOS couldn't find for some unknown reason
+sed -i '' "s/common_user_inc = \[\]/common_user_inc = \['include', 'build'\]/" meson.build
 
 echo DBG
 ./configure --help
 
 ./configure \
     --bindir=bin \
-    --cross-prefix=aarch64-linux-gnu- \
     --datadir=share/qemu \
     --enable-gcrypt \
     --enable-sdl \
     --enable-slirp \
     --enable-stack-protector \
-    --extra-cflags=-Werror \
-    --prefix=${PWD}/install/qemu \
+    --prefix=$PWD/install/qemu \
+    --python=python3 \
     --target-list=${TARGET} \
     --with-pkgversion="${VERSION}" \
     --with-suffix="" \
