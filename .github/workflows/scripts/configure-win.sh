@@ -16,21 +16,16 @@ echo DBG
 ./configure \
     --bindir=bin \
     --datadir=share/qemu \
-    --disable-capstone \
-    --disable-docs \
-    --disable-gettext \
-    --disable-gtk \
-    --disable-qga-vss \
-    --disable-user \
-    --disable-vnc \
     --enable-gcrypt \
     --enable-iconv \
     --enable-sdl \
     --enable-slirp \
+    --enable-stack-protector \
     --extra-cflags=-Werror \
     --prefix=${PWD}/install/qemu \
     --static \
     --target-list=${TARGET} \
     --with-pkgversion="${VERSION}" \
     --with-suffix="" \
+    --without-default-features \
 || { cat meson-logs/meson-log.txt && false; }
