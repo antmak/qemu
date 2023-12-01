@@ -19,7 +19,7 @@ if [ -f "${PYFIX_FILE}" ] ; then
   python3 -m pip install --upgrade pip
   python3 -m pip install looseversion
 
-  sed -i='' "s/distutils.version/looseversion/" "${PYFIX_FILE}"
+  sed -i '' "s/distutils.version/looseversion/" "${PYFIX_FILE}"
 fi
 
 # dbg
