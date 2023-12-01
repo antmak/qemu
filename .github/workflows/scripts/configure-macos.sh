@@ -7,7 +7,7 @@ VERSION=${VERSION:-dev}
 
 sed -i='' "s/project('qemu', \['c'\],/project('qemu', \['c', 'objc'\],/" meson.build
 
-# workaround for some headers
+# workaround for some headers that macOS couldn't find for some unknown reason
 sed -i='' "s/common_user_inc = \[\]/common_user_inc = \['include', 'build'\]/" meson.build
 
 echo DBG
@@ -20,10 +20,10 @@ echo DBG
     --disable-cocoa \
     --disable-coreaudio \
     --disable-docs \
-    --disable-sdl \
     --disable-user \
     --disable-vnc \
     --enable-gcrypt \
+    --enable-sdl \
     --enable-slirp \
     --prefix=$PWD/install/qemu \
     --python=python3 \

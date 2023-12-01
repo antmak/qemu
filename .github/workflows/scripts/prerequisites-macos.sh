@@ -8,6 +8,7 @@ brew install \
   ninja \
   pixman \
   pkg-config \
+  sdl2 \
 && :
 
 # workaround if deprecated module 'distutils.version' is missing
