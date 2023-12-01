@@ -10,12 +10,13 @@ brew install \
   pkg-config \
 && :
 
+# workaround if deprecated module 'distutils.version' is missing
+# https://peps.python.org/pep-0632/#migration-advice
+# https://pypi.org/project/looseversion/
 PYFIX_FILE=/usr/local/Cellar/glib/2.78.1/share/glib-2.0/codegen/utils.py
 if [ -f "${PYFIX_FILE}" ] ; then
   python3 -m pip install --upgrade pip
-  python3 -m pip install packaging
-  python3 -m pip freeze
+  python3 -m pip install looseversion
 
-  sed -i='' "s/distutils.version/packaging/" "${PYFIX_FILE}"
-  grep -v "^#" "${PYFIX_FILE}" | head
+  sed -i='' "s/distutils.version/looseversion/" "${PYFIX_FILE}"
 fi
