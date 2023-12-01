@@ -16,6 +16,6 @@ if [ -f "${PYFIX_FILE}" ] ; then
   python3 -m pip install packaging
   python3 -m pip freeze
 
-  sed -i='' "s/import distutils.version/import packaging/" "${PYFIX_FILE}"
+  sed -i='' "s/distutils.version/packaging/" "${PYFIX_FILE}"
   grep -v "^#" "${PYFIX_FILE}" | head
 fi
