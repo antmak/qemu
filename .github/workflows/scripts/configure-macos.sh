@@ -39,3 +39,4 @@ echo DBG
     --with-pkgversion="${VERSION}" \
     --with-suffix="" \
 || { cat meson-logs/meson-log.txt && false; }
+
