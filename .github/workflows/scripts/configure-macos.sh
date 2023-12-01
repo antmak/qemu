@@ -18,12 +18,6 @@ sed -i='' "s/project('qemu', \['c'\],/project('qemu', \['c', 'objc'\],/" meson.b
 
 sed -i='' "s/common_user_inc = \[\]/common_user_inc = \['include', 'build'\]/" meson.build
 
-PYFIX_FILE=/usr/local/Cellar/glib/2.78.1/share/glib-2.0/codegen/utils.py
-if [ -f "${PYFIX_FILE}" ] ; then
-    sed -i='' "s/import distutils.version/import packaging/" "${PYFIX_FILE}"
-    grep -v "^#" "${PYFIX_FILE}" | head
-fi
-
 echo DBG
 ./configure --help
 
