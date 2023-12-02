@@ -73,7 +73,7 @@ jobs:
           - platform: x86_64-w64-mingw32
             runs_on: windows-2022
             shell: msys2 {0}
-            run_configure: "./.github/workflows/scripts/configure-static.sh"
+            run_configure: "./.github/workflows/scripts/configure-win.sh"
 
           - platform: x86_64-apple-darwin
             runs_on: macos-12

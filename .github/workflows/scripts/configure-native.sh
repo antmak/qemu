@@ -17,11 +17,6 @@ echo DBG
 ./configure \
     --bindir=bin \
     --datadir=share/qemu \
-    --disable-capstone \
-    --disable-docs \
-    --disable-gtk \
-    --disable-user \
-    --disable-vnc \
     --enable-gcrypt \
     --enable-sdl \
     --enable-slirp \
@@ -30,4 +25,5 @@ echo DBG
     --target-list=${TARGET} \
     --with-pkgversion="${VERSION}" \
     --with-suffix="" \
+    --without-default-features \
 || { cat meson-logs/meson-log.txt && false; }
