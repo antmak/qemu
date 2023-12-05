@@ -20,6 +20,7 @@ echo DBG
     --enable-iconv \
     --enable-sdl \
     --enable-slirp \
+    --enable-stack-protector \
     --extra-cflags=-Werror \
     --prefix=${PWD}/install/qemu \
     --static \

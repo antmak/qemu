@@ -18,6 +18,7 @@ echo DBG
     --enable-gcrypt \
     --enable-sdl \
     --enable-slirp \
+    --enable-stack-protector \
     --extra-cflags=-Werror \
     --prefix=${PWD}/install/qemu \
     --target-list=${TARGET} \

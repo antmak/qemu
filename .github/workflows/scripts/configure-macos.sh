@@ -19,6 +19,7 @@ echo DBG
     --enable-gcrypt \
     --enable-sdl \
     --enable-slirp \
+    --enable-stack-protector \
     --prefix=$PWD/install/qemu \
     --python=python3 \
     --target-list=${TARGET} \
