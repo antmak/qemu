@@ -19,19 +19,18 @@ build-linux:
         TARGET: [riscv32-linux-user, xtensa-softmmu, riscv32-softmmu]
   script:
     - VERSION=${CI_COMMIT_TAG:-""}
-    - VERSION=${VERSION#"esp-v"}    # remove prefix in tags like `esp-v7.1.0_20221221`
-    - VERSION=${VERSION#"esp-"}     # remove prefix in tags like `esp-develop-20221221`
     - VERSION=${VERSION//"-"/"_"}   # replace dashes with underscores in the version
     - VERSION=${VERSION:-${CI_COMMIT_SHORT_SHA}}
 
-    - ./configure --prefix=/opt/qemu --target-list=${TARGET} --with-pkgversion=${VERSION} --extra-cflags=-Werror --disable-capstone --disable-vnc --disable-sdl --disable-gtk --enable-gcrypt --enable-slirp
+    - ./.github/workflows/scripts/prerequisites-native.sh
+    - ./.github/workflows/scripts/configure-native.sh
     - ninja -C build install
 
-    - find /opt/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rf {} \;
-    - mkdir -p dist
+    - find ./install/qemu/share/qemu -maxdepth 1 -mindepth 1 -not -name 'esp*.bin' -exec rm -rfv {} \;
     - DIST_DIR=${PWD}/dist
-    - export ARCHIVE_NAME=esp-qemu-${TARGET}-${VERSION}-${PLATFORM}.tar.bz2
-    - cd /opt
+    - mkdir -p ${DIST_DIR}
+    - cd ./install
+    - export ARCHIVE_NAME=qemu-${TARGET}-${VERSION}-${PLATFORM}.tar.bz2
     - tar cjvf ${DIST_DIR}/${ARCHIVE_NAME} qemu
     - echo $ARCHIVE_NAME >${DIST_DIR}/archive_name_${TARGET}_${PLATFORM}
 
