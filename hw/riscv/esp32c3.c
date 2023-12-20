@@ -400,6 +400,7 @@ static void esp32c3_machine_init(MachineState *machine)
 
     /* SPI1 controller (SPI Flash) */
     {
+        ms->spi1.xts_aes = &ms->xts_aes;
         sysbus_realize(SYS_BUS_DEVICE(&ms->spi1), &error_fatal);
         MemoryRegion *mr = sysbus_mmio_get_region(SYS_BUS_DEVICE(&ms->spi1), 0);
         memory_region_add_subregion_overlap(sys_mem, DR_REG_SPI1_BASE, mr, 0);
@@ -429,6 +430,7 @@ static void esp32c3_machine_init(MachineState *machine)
         if (blk) {
             ms->cache.flash_blk = blk;
         }
+        ms->cache.xts_aes = &ms->xts_aes;
         sysbus_realize(SYS_BUS_DEVICE(&ms->cache), &error_fatal);
         MemoryRegion *mr = sysbus_mmio_get_region(SYS_BUS_DEVICE(&ms->cache), 0);
         memory_region_add_subregion_overlap(sys_mem, DR_REG_EXTMEM_BASE, mr, 0);
